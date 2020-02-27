@@ -1,0 +1,19 @@
+POST http://localhost:8080/book
+Content-Type: application/json
+
+{
+  "isbn": "978-0684853949",
+  "title": "The Man Who Mistook His Wife For A Hat: And Other Clinical Tales",
+  "author": "Oliver Sacks",
+  "publisher": "Touchstone"
+}
+
+###
+
+GET http://localhost:8080/book/978-0684853949
+
+###
+
+DELETE http://localhost:8080/book/978-0684853949
+
+###
