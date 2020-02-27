@@ -1,3 +1,11 @@
+GET http://localhost:8080/book/978-0684853949
+
+###
+
+GET http://localhost:8080/book/list?page=2&pageSize=2
+
+###
+
 POST http://localhost:8080/book
 Content-Type: application/json
 
@@ -10,10 +18,30 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/book/978-0684853949
+POST http://localhost:8080/book/list
+Content-Type: application/json
+
+[
+  {
+    "isbn": "978-8932027265",
+    "title": "사람, 장소, 환대",
+    "author": "김현경",
+    "publisher": "문학과 지성사"
+  },
+  {
+    "isbn": "979-11609437339",
+    "title": "실격당한 자들을 위한 변론",
+    "author": "김원영",
+    "publisher": "사계"
+  },
+  {
+  "isbn": "978-1555977207",
+  "title": "On Immunity: An Inoculation",
+  "author": "Eula Biss",
+  "publisher": "Graywolf Press"
+  }
+]
 
 ###
 
 DELETE http://localhost:8080/book/978-0684853949
-
-###
