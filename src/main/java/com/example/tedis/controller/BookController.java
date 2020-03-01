@@ -1,7 +1,7 @@
 package com.example.tedis.controller;
 
 import com.example.tedis.model.Book;
-import com.example.tedis.repository.BookRepository;
+import com.example.tedis.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,35 +10,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/book")
 public class BookController {
-    private final BookRepository bookRepository;
+    private final BookService bookService;
 
     @Autowired
-    public BookController(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @GetMapping("/list")
     public List<Book> getList(int page, int pageSize) {
-        return bookRepository.getList(page, pageSize);
+        return bookService.getPagedList(page, pageSize);
     }
 
     @GetMapping("/{isbn}")
     public Book get(@PathVariable String isbn) {
-        return bookRepository.get(isbn);
+        return bookService.getById(isbn);
     }
 
     @PostMapping
     public Book add(@RequestBody Book book) {
-        return bookRepository.add(book);
+        return bookService.add(book);
     }
 
     @PostMapping("/list")
     public List<Book> addList(@RequestBody List<Book> books) {
-        return bookRepository.addAll(books);
+        return bookService.addAll(books);
     }
 
     @DeleteMapping("/{isbn}")
-    public Book delete(@PathVariable String isbn) {
-        return bookRepository.remove(isbn);
+    public boolean delete(@PathVariable String isbn) {
+        return bookService.remove(isbn);
     }
 }

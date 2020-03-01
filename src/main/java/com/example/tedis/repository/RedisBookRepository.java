@@ -21,21 +21,20 @@ public class RedisBookRepository implements BookRepository {
     private static final String INDEX_KEY = "book:idx";
     private static final double FIXED_SCORE = 0;
 
+    private final RedisTemplate<String, Object> redisTemplate;
     private final HashOperations<String, String, Object> hashOperations;
     private final BoundZSetOperations<String, Object> boundZSetOperations;
     private final Jackson2HashMapper jackson2HashMapper = new Jackson2HashMapper(false);
 
     @Autowired
     public RedisBookRepository(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
         this.hashOperations = redisTemplate.opsForHash();
         this.boundZSetOperations = redisTemplate.boundZSetOps(INDEX_KEY);
     }
 
     @Override
-    public List<Book> getList(int page, int pageSize) {
-        int start = (page - 1) * pageSize;
-        int stop = page * pageSize - 1;
-
+    public List<Book> findByRange(int start, int stop) {
         List<Object> keys = Optional.ofNullable(boundZSetOperations.range(start, stop))
                 .map(LettuceLists::newList)
                 .orElse(new ArrayList<>());
@@ -47,7 +46,7 @@ public class RedisBookRepository implements BookRepository {
     }
 
     @Override
-    public Book get(String isbn) {
+    public Book find(String isbn) {
         Map<String, Object> entries = hashOperations.entries(KEY_PREFIX + isbn);
 
         if (entries.isEmpty()) {
@@ -58,15 +57,15 @@ public class RedisBookRepository implements BookRepository {
     }
 
     @Override
-    public Book add(Book book) {
+    public Book save(Book book) {
         boundZSetOperations.add(book.getIsbn(), FIXED_SCORE);
         hashOperations.putAll(KEY_PREFIX + book.getIsbn(), jackson2HashMapper.toHash(book));
 
-        return get(book.getIsbn());
+        return find(book.getIsbn());
     }
 
     @Override
-    public List<Book> addAll(List<Book> books) {
+    public List<Book> saveAll(List<Book> books) {
         for (Book book : books) {
             boundZSetOperations.add(book.getIsbn(), FIXED_SCORE);
             hashOperations.putAll(KEY_PREFIX + book.getIsbn(), jackson2HashMapper.toHash(book));
@@ -75,11 +74,14 @@ public class RedisBookRepository implements BookRepository {
         return books;
     }
 
-    public Book remove(String isbn) {
-        Book book = get(isbn);
-        boundZSetOperations.remove(isbn);
-        hashOperations.delete(KEY_PREFIX + isbn, jackson2HashMapper.toHash(book).keySet().toArray());
+    public boolean remove(String isbn) {
+        if (boundZSetOperations.score(isbn) == null) {
+            return false;
+        }
 
-        return book;
+        boundZSetOperations.remove(isbn);
+        redisTemplate.delete(KEY_PREFIX + isbn);
+
+        return true;
     }
 }

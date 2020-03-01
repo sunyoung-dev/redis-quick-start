@@ -5,13 +5,13 @@ import com.example.tedis.model.Book;
 import java.util.List;
 
 public interface BookRepository {
-    List<Book> getList(int page, int pageSize);
+    List<Book> findByRange(int start, int stop);
 
-    Book get(String isbn);
+    Book find(String isbn);
 
-    Book add(Book book);
+    Book save(Book book);
 
-    List<Book> addAll(List<Book> books);
+    List<Book> saveAll(List<Book> books);
 
-    Book remove(String isbn);
+    boolean remove(String isbn);
 }
